@@ -160,6 +160,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 			case 38: /*up*/
 			case 87: /*W*/ this.moveForward = false; break;
+			
 
 			case 37: /*left*/
 			case 65: /*A*/ this.moveLeft = false; break;
@@ -240,6 +241,7 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 						this.object.translateY( actualMoveSpeed );
 					}
 				}
+				
 			}
 
 			var actualLookSpeed = delta * this.lookSpeed;

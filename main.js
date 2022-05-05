@@ -6,33 +6,39 @@
  */
 
 var map = [ // 1  2  3  4  5  6  7  8  9
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,], // 0
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 1
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 2
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 3
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 4
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 5
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 6
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 7
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1,], // 8
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,], // 9
+			
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
+		   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 2
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 3
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 4
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,],															 // 0
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 2
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 1, 0, 1, 1, 1, 1, 1, 1,1,], // 3
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 4
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 5
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 6
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 7
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 8
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1,], // 9
            ], mapW = map.length, mapH = map[0].length;
 
 // Semi-constants
 var WIDTH = window.innerWidth,
 	HEIGHT = window.innerHeight,
 	ASPECT = WIDTH / HEIGHT,
-	UNITSIZE = 250,
+	UNITSIZE = 500,
 	WALLHEIGHT = UNITSIZE / 3,
-	MOVESPEED = 100,
+	MOVESPEED = 400,
 	LOOKSPEED = 0.075,
 	BULLETMOVESPEED = MOVESPEED * 5,
-	NUMAI = 3,
+	NUMAI = 100,
 	PROJECTILEDAMAGE = 20;
 // Global vars
 var t = THREE, scene, cam, renderer, controls, clock, projector, model, skin;
-var runAnim = true, mouse = { x: 0, y: 0 }, kills = 0, health = 100;
-var healthCube,coin,coin1,coin2,coin3,speedBoost,speedPickup, lastHealthPickup = 0;
+var runAnim = true, mouse = { x: 0, y: 0 }, kills = 0, health = 100,coins=0;
+var healthCube,door,limit2, time_elapsed2,coin,coin1,coin2,coin3,speedBoost,speedPickup, lastHealthPickup,lastCoinPickup = 0;
 /*
 var finder = new PF.AStarFinder({ // Defaults to Manhattan heuristic
 	allowDiagonal: true,
@@ -76,7 +82,13 @@ function init() {
 	// Set up camera
 	cam = new t.PerspectiveCamera(60, ASPECT, 1, 10000); // FOV, aspect, near, far
 	cam.position.y = UNITSIZE * .2;
+	cam.position.z=4500;
+	cam.position.x=2500;
+	
+	console.log(cam.position);
 	scene.add(cam);
+
+	
 	
 	// Camera moves with mouse, flies around with WASD/arrow keys
 	controls = new t.FirstPersonControls(cam);
@@ -114,8 +126,8 @@ function init() {
 
 	// Display HUD
 	$('body').append('<canvas id="radar" width="200" height="200"></canvas>');
-	$('body').append('<div id="hud"><p>Health: <span id="health">100</span><br />Score: <span id="score">0</span></p></div>');
-	$('body').append('<div id="credits"><p>Created by <a href="http://www.isaacsukin.com/">Isaac Sukin</a> using <a href="http://mrdoob.github.com/three.js/">Three.js</a><br />WASD to move, mouse to look, click to shoot</p></div>');
+	$('body').append('<div id="hud"><p>Health: <span id="health">100</span><br />Score: <span id="score">0</span></p><p>Coins: <span id="coins">0</span></p></div>');
+	//$('body').append('<div id="credits"><p>Created by <a href="http://www.isaacsukin.com/">Isaac Sukin</a> using <a href="http://mrdoob.github.com/three.js/">Three.js</a><br />WASD to move, mouse to look, click to shoot</p></div>');
 	
 	// Set up "hurt" flash
 	$('body').append('<div id="hurt"></div>');
@@ -155,29 +167,75 @@ function render() {
 		limit=5000;
 		//if (time_elapse>limit) {
 		if((time_elapsed<limit)&&distance(cam.position.x, cam.position.z, speedBoost.position.x, speedBoost.position.z) < 500){
-			controls.movementSpeed=300;
+			controls.movementSpeed=800;
 			
 		}
 		
 		else if(time_elapsed>limit&&distance(cam.position.x, cam.position.z, speedBoost.position.x, speedBoost.position.z) > 500){
-			controls.movementSpeed=200;
+			controls.movementSpeed=400;
 			
 		}
 	
 
 
-	if (Date.now() > lastHealthPickup + 60000) {
+	
 		if (distance(cam.position.x, cam.position.z, healthcube.position.x, healthcube.position.z) < 15 && health != 100) {
 			health = Math.min(health + 50, 100);
 			$('#health').html(health);
 			
 			lastHealthPickup = Date.now();
+			
 		}
-		healthcube.material.wireframe = false;
-	}
-	else {
-		healthcube.material.wireframe = true;
-	}
+	
+	
+	// else {
+	// 	health=health;
+	// }
+	
+	
+		if (distance(cam.position.x, cam.position.z, coin.position.x, coin.position.z) < 10) {
+			
+			coins = coins+1;
+			//$('#health').html(health);
+			$('#coins').html(coins);
+			lastCoinPickup = Date.now();
+			scene.remove(coin);
+		}
+		
+		if (distance(cam.position.x, cam.position.z, coin1.position.x, coin1.position.z) < 10 ) {
+			
+			coins = coins+1;
+			//$('#health').html(health);
+			$('#coins').html(coins);
+			lastCoinPickup = Date.now();
+			scene.remove(coin1);
+		}
+		
+		if (distance(cam.position.x, cam.position.z, coin2.position.x, coin2.position.z) < 10 ) {
+			
+			coins = coins+1;
+			//$('#health').html(health);
+			$('#coins').html(coins);
+			lastCoinPickup = Date.now();
+			scene.remove(coin2);
+		}
+		
+		if (distance(cam.position.x, cam.position.z, coin3.position.x, coin3.position.z) < 10) {
+			
+			coins = coins+1;
+			//$('#health').html(health);
+			$('#coins').html(coins);
+			lastCoinPickup = Date.now();
+			scene.remove(coin3);
+		}
+		
+		if(coins>0&&distance(cam.position.x, cam.position.z, door.position.x, door.position.z) <15){
+			scene.remove(door);
+			
+		}
+
+		
+	
 
 	// Update bullets. Walk backwards through the list so we can remove items.
 	for (var i = bullets.length-1; i >= 0; i--) {
@@ -317,8 +375,8 @@ function render() {
 
 function setupScene() {
 	
-	var UNITSIZE = 250, units = 10;
-	console.log(units);
+	var UNITSIZE = 500, units = mapW;
+	
 	
 	// Geometry: floor
 	/*var floor = new t.Mesh(
@@ -333,9 +391,11 @@ function setupScene() {
 		map:t.ImageUtils.loadTexture('images/floorstones.jpg')
 	});
 	// plane
-	var plane = new t.Mesh(new t.CubeGeometry(2500,10,2500),img);
+	var plane = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),img);
+	plane.scale.set(2,2,2);
 	plane.overdraw = true;
 	scene.add(plane);
+
 	// Geometry: walls
 	//var cube = new t.CubeGeometry(UNITSIZE, WALLHEIGHT, UNITSIZE);
 	//var materials =
@@ -360,6 +420,7 @@ function setupScene() {
 				wall.position.x = (i - units/2) * UNITSIZE;
 				wall.position.y = WALLHEIGHT/2;
 				wall.position.z = (j - units/2) * UNITSIZE;
+
 				scene.add(wall);
 				//}
 			}
@@ -371,45 +432,55 @@ function setupScene() {
 			new t.CubeGeometry(30, 30, 30),
 			new t.MeshBasicMaterial({map: t.ImageUtils.loadTexture('images/health.png')})
 	);
-	healthcube.position.set(-UNITSIZE-15, 35, -UNITSIZE-15);
+	healthcube.position.set(-UNITSIZE-15, 55, -UNITSIZE-15);
+	healthcube.scale.set(2,2,2);
 	scene.add(healthcube);
-	
+
+	door = new t.Mesh(
+		new t.CubeGeometry(50, 55, 50),
+		new t.MeshBasicMaterial({map: t.ImageUtils.loadTexture('images/medieval_door.jpg')})
+	);
+	door.position.set(350, 145, 1750);
+	door.scale.set(0.5,5,15);
+	scene.add(door);
+		
 	speedBoost= new t.Mesh(
 		new t.SphereGeometry(10,10,10),
-		new t.MeshBasicMaterial({map: t.ImageUtils.loadTexture('images/Flash_Logo_01.jpg')})
+		new t.MeshBasicMaterial({map: t.ImageUtils.loadTexture('images/Flash_Logo_01.png')})
 	);
-	speedBoost.position.set(-UNITSIZE+200, 35, -UNITSIZE+200);
+	speedBoost.position.set(-UNITSIZE+200, 55, -UNITSIZE+200);
+	speedBoost.scale.set(2,2,2);
 	scene.add(speedBoost);
 
 coin = new t.Mesh(
         new t.CubeGeometry(10, 10, 10),
         new t.MeshNormalMaterial());
-		coin.position.set(-UNITSIZE+400, 35, -UNITSIZE+400);
-		
+		coin.position.set(650, 55, 1900);
+		coin.scale.set(2,2,2);
 		scene.add(coin);
 		
 coin1 = new t.Mesh(
 		new t.CubeGeometry(10, 10, 10),
 		new t.MeshNormalMaterial());
-		coin1.position.set(-UNITSIZE-200, 35, -UNITSIZE+200);
-					
+		coin1.position.set(2300, 55, 2300);
+		coin1.scale.set(2,2,2);			
 		scene.add(coin1);
 
 coin2 = new t.Mesh(
 		new t.CubeGeometry(10, 10, 10),
 		new t.MeshNormalMaterial());
-		coin2.position.set(-UNITSIZE-100, 35, -UNITSIZE+100);
-						
+		coin2.position.set(-UNITSIZE-100, 55, -UNITSIZE-100);
+		coin2.scale.set(2,2,2);				
 		scene.add(coin2);
 
 coin3 = new t.Mesh(
 		new t.CubeGeometry(10, 10, 10),
 		new t.MeshNormalMaterial());
-		coin1.position.set(-UNITSIZE+50, 35, -UNITSIZE+50);
-							
+		coin3.position.set(-UNITSIZE-550, 55, -UNITSIZE-550);
+		coin3.scale.set(2,2,2);					
 		scene.add(coin3);
 
-		 
+
 // Mesh cloned a bunch of times from original
 
 
