@@ -30,11 +30,11 @@ var WIDTH = window.innerWidth,
 	ASPECT = WIDTH / HEIGHT,
 	UNITSIZE = 500,
 	WALLHEIGHT = UNITSIZE / 3,
-	MOVESPEED = 400,
-	LOOKSPEED = 0.075,
-	BULLETMOVESPEED = MOVESPEED * 5,
-	NUMAI = 100,
-	PROJECTILEDAMAGE = 20;
+	MOVESPEED = 400,a
+	LOOKSPEED = 0.5175,
+	BULLETMOVESPEED = MOVESPEED * 2,
+	NUMAI = 10,
+	PROJECTILEDAMAGE = 20;  // TODO
 // Global vars
 var t = THREE, scene, cam, renderer, controls, clock, projector, model, skin;
 var runAnim = true, mouse = { x: 0, y: 0 }, kills = 0, health = 100,coins=0;
@@ -56,15 +56,7 @@ $(document).ready(function() {
 		setInterval(drawRadar, 1000);
 		animate();
 	});
-	/*
-	new t.ColladaLoader().load('models/Yoshi/Yoshi.dae', function(collada) {
-		model = collada.scene;
-		skin = collada.skins[0];
-		model.scale.set(0.2, 0.2, 0.2);
-		model.position.set(0, 5, 0);
-		scene.add(model);
-	});
-	*/
+
 });
 
 
@@ -85,7 +77,7 @@ function init() {
 	cam.position.z=4500;
 	cam.position.x=2500;
 	
-	console.log(cam.position);
+
 	scene.add(cam);
 
 	
@@ -142,8 +134,30 @@ function animate() {
 	render();
 }
 
+new t.ColladaLoader().load('models/rifle2.dae', function(collada) {
+	model = collada.scene;
+	skin = collada.skins[0];
+	model.scale.set(100, 100, 100);
+	model.rotation.x = 30;
+	model.rotation.z = 185;
+	model.position.set(2000, 100, 3000);
+
+
+});
+
 // Update and display
 function render() {
+	var scene = this.scene;
+
+
+	cam.add(model)
+	model.position.set(0, -120, 0)
+
+
+
+	//scene.add(model);
+
+
 	var delta = clock.getDelta(), speed = delta * BULLETMOVESPEED;
 	var aispeed = delta * MOVESPEED;
 	controls.update(delta); // Move camera
@@ -247,20 +261,20 @@ function render() {
 		}
 		// Collide with AI
 		var hit = false;
-		for (var j = ai.length-1; j >= 0; j--) {
-			var a = ai[j];
-			var v = a.geometry.vertices[0];
-			var c = a.position;
-			var x = Math.abs(v.x), z = Math.abs(v.z);
+		for (var j = aiList.length-1; j >= 0; j--) {
+			var aiListElement = aiList[j];
+			var vertices = aiListElement.geometry.vertices[0];
+			var c = aiListElement.position;
+			var x = Math.abs(vertices.x), z = Math.abs(vertices.z);
 			//console.log(Math.round(p.x), Math.round(p.z), c.x, c.z, x, z);
 			if (p.x < c.x + x && p.x > c.x - x &&
 					p.z < c.z + z && p.z > c.z - z &&
-					b.owner != a) {
+					b.owner != aiListElement) {
 				bullets.splice(i, 1);
 				scene.remove(b);
-				a.health -= PROJECTILEDAMAGE;
-				var color = a.material.color, percent = a.health / 100;
-				a.material.color.setRGB(
+				aiListElement.health -= PROJECTILEDAMAGE;
+				var color = aiListElement.material.color, percent = aiListElement.health / 100;
+				aiListElement.material.color.setRGB(
 						percent * color.r,
 						percent * color.g,
 						percent * color.b
@@ -288,10 +302,10 @@ function render() {
 	}
 	
 	// Update AI.
-	for (var i = ai.length-1; i >= 0; i--) {
-		var a = ai[i];
+	for (var i = aiList.length-1; i >= 0; i--) {
+		var a = aiList[i];
 		if (a.health <= 0) {
-			ai.splice(i, 1);
+			aiList.splice(i, 1);
 			scene.remove(a);
 			kills++;
 			$('#score').html(kills * 100);
@@ -313,7 +327,7 @@ function render() {
 			a.lastRandomZ = Math.random() * 2 - 1;
 		}
 		if (c.x < -1 || c.x > mapW || c.z < -1 || c.z > mapH) {
-			ai.splice(i, 1);
+			aiList.splice(i, 1);
 			scene.remove(a);
 			addAI();
 			
@@ -496,8 +510,9 @@ coin3 = new t.Mesh(
 
 }
 
-var ai = [];
-var aiGeo = new t.CubeGeometry(40, 40, 40);
+var aiList = [];
+//var vertices;
+var aiGeometry  = new t.CubeGeometry(40, 40, 40);
 function setupAI() {
 	for (var i = 0; i < NUMAI; i++) {
 		addAI();
@@ -513,7 +528,9 @@ function addAI() {
 	var c = getMapSector(cam.position);
 	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
 	
-	var o = new t.Mesh(aiGeo, aiMaterial);
+	var enemy = new t.Mesh(aiGeometry, aiMaterial);
+
+
 
 	do {
 		var x = getRandBetween(0, mapW-1);
@@ -522,16 +539,33 @@ function addAI() {
 	x = Math.floor(x - mapW/2) * UNITSIZE;
 	z = Math.floor(z - mapW/2) * UNITSIZE;
 	
-	o.position.set(x, UNITSIZE * 0.15, z);
-	o.health = 100;
+	enemy.position.set(x, UNITSIZE * 0.15, z);
+	enemy.health = 100;
 	 // Higher-fidelity timers aren't a big deal here.
 	
-	o.pathPos = 1;
-	o.lastRandomX = Math.random();
-	o.lastRandomZ = Math.random();
-	o.lastShot = Date.now(); // Higher-fidelity timers aren't a big deal here.
-	ai.push(o);
-	scene.add(o);
+	enemy.pathPos = 1;
+	enemy.lastRandomX = Math.random();
+	enemy.lastRandomZ = Math.random();
+	enemy.lastShot = Date.now(); // Higher-fidelity timers aren't a big deal here.
+
+	// added by me
+
+	//var modelEnemy = model;
+	//enemy = modelEnemy;
+
+	// modelEnemy.position.set(x, UNITSIZE * 0.15, z);
+	// modelEnemy.health = 100;
+	// modelEnemy.pathPos = 1;
+	// modelEnemy.lastRandomX = Math.random();
+	// modelEnemy.lastRandomZ = Math.random();
+	// modelEnemy.lastShot = Date.now();
+	//vertices = enemy.geometry.vertices[0];
+
+	//console.log(enemy.position)
+
+	aiList.push(enemy);
+	scene.add(enemy);
+
 }
 
 function getAIpath(a) {
@@ -599,8 +633,8 @@ function drawRadar() {
 	for (var i = 0; i < mapW; i++) {
 		for (var j = 0, m = map[i].length; j < m; j++) {
 			var d = 0;
-			for (var k = 0, n = ai.length; k < n; k++) {
-				var e = getMapSector(ai[k].position);
+			for (var k = 0, n = aiList.length; k < n; k++) {
+				var e = getMapSector(aiList[k].position);
 				if (i == e.x && j == e.z) {
 					d++;
 				}
