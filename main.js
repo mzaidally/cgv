@@ -592,12 +592,19 @@ function setupScene() {
 	scene.add(floor);
 	*/
 
-	var img = new t.MeshLambertMaterial({
-		
-		map:t.ImageUtils.loadTexture('images/floorstones.jpg')
-	});
+	const texture = t.ImageUtils.loadTexture('images/floor.jpg');
+
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set(100, 100,);
+	texture.needsUpdate = true;
+
+	var floorTexture = new t.MeshLambertMaterial({map:texture});
+
+
 	// plane
-	var plane = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),img);
+	var plane = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),floorTexture);
+
 	plane.scale.set(2,2,2);
 	plane.overdraw = true;
 	scene.add(plane);
@@ -617,8 +624,15 @@ function setupScene() {
 				//for (k=10;k>-1;k--){
 				
 				var cube = new t.CubeGeometry(UNITSIZE, WALLHEIGHT, UNITSIZE);
-				var materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/scifi_walls.jpg')});
-					
+								var materials;
+
+				if ( i < 8 && j > 9)
+					materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/scifi_walls.jpg')});
+
+				else
+					materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/floor.jpg')});
+
+	
 				
 				var wall = new t.Mesh(cube, materials);
 				
