@@ -30,10 +30,10 @@ var WIDTH = window.innerWidth,
 	ASPECT = WIDTH / HEIGHT,
 	UNITSIZE = 500,
 	WALLHEIGHT = UNITSIZE / 3,
-	MOVESPEED = 400,a
+	MOVESPEED = 400,
 	LOOKSPEED = 0.5175,
 	BULLETMOVESPEED = MOVESPEED * 2,
-	NUMAI = 10,
+	NUMAI = 5,
 	PROJECTILEDAMAGE = 20;  // TODO
 // Global vars
 var t = THREE, scene, cam, renderer, controls, clock, projector, model, skin;
@@ -94,7 +94,7 @@ function init() {
 	
 	// Artificial Intelligence
 	setupAI();
-	
+	setupAI2();
 	
 	// Handle drawing as WebGL (faster than Canvas but less supported)
 	renderer = new t.WebGLRenderer();
@@ -134,24 +134,53 @@ function animate() {
 	render();
 }
 
-new t.ColladaLoader().load('models/rifle2.dae', function(collada) {
-	model = collada.scene;
-	skin = collada.skins[0];
-	model.scale.set(100, 100, 100);
-	model.rotation.x = 30;
-	model.rotation.z = 185;
-	model.position.set(2000, 100, 3000);
+// new t.ColladaLoader().load('models/spider.dae', function(collada) {
+// 	model = collada.scene;
+// 	skin = collada.skins[0];
+// 	model.scale.set(100, 100, 100);
+// 	model.rotation.x = 30;
+// 	model.rotation.z = 185;
+// 	model.position.set(2000, 100, 3000);
 
 
-});
+// });
+//     function updateAngle(model){
+// 	var dx = cam.x - this.x;
+// 	console.log("this code is reached");
+// 	this.dy = cam.y - this.y;
+// 	this.distance = Math.sqrt((this.dx*this.dx) + (this.dy*this.dy));
+// 	this.angle = Math.atan2(this.dy,this.dx) * 180 / Math.PI;
+//   }
+// 	this.UpdateSpeed = function() {
+// 	this.speedX = this.speed * (this.dx/this.distance);
+// 	this.speedY = this.speed * (this.dy/this.distance);
+//   }
+//   this.Move = function() {
+// 	this.UpdateAngle();
+// 	this.UpdateSpeed();
+// 	console.log("reached")
+// 	this.x += this.speedX;
+// 	this.y += this.speedY;
+//   }
+
+// function zombieAi()
+// {
+
+
+
+// 	scene.add(model);
+// }
 
 // Update and display
 function render() {
 	var scene = this.scene;
 
 
-	cam.add(model)
-	model.position.set(0, -120, 0)
+	//cam.add(model)
+	// model.position.set(0, -120, 0)
+
+
+	// zombieAi();
 
 
 
@@ -329,7 +358,8 @@ function render() {
 		if (c.x < -1 || c.x > mapW || c.z < -1 || c.z > mapH) {
 			aiList.splice(i, 1);
 			scene.remove(a);
-			addAI();
+			//addAI();
+			
 			
 		}
 		/*
@@ -353,6 +383,168 @@ function render() {
 			createBullet(a);
 			a.lastShot = Date.now();
 		}
+	
+	}
+
+	for (var i = bullets.length-1; i >= 0; i--) {
+		var b = bullets[i], p = b.position, d = b.ray.direction;
+		if (checkWallCollision(p)) {
+			bullets.splice(i, 1);
+			scene.remove(b);
+			continue;
+		}
+		// Collide with AI
+		var hit = false;
+		for (var j = aiList.length-1; j >= 0; j--) {
+			var aiListElement = aiList[j];
+			var vertices = aiListElement.geometry.vertices[0];
+			var c = aiListElement.position;
+			var x = Math.abs(vertices.x), z = Math.abs(vertices.z);
+			//console.log(Math.round(p.x), Math.round(p.z), c.x, c.z, x, z);
+			if (p.x < c.x + x && p.x > c.x - x &&
+					p.z < c.z + z && p.z > c.z - z &&
+					b.owner != aiListElement) {
+				bullets.splice(i, 1);
+				scene.remove(b);
+				aiListElement.health -= PROJECTILEDAMAGE;
+				var color = aiListElement.material.color, percent = aiListElement.health / 100;
+				aiListElement.material.color.setRGB(
+						percent * color.r,
+						percent * color.g,
+						percent * color.b
+				);
+				hit = true;
+				break;
+			}
+		}
+		// Bullet hits player
+		if (distance(p.x, p.z, cam.position.x, cam.position.z) < 25 && b.owner != cam) {
+			$('#hurt').fadeIn(75);
+			health -= 10;
+			if (health < 0) health = 0;
+			val = health < 25 ? '<span style="color: darkRed">' + health + '</span>' : health;
+			$('#health').html(val);
+			bullets.splice(i, 1);
+			scene.remove(b);
+			$('#hurt').fadeOut(350);
+		}
+		if (!hit) {
+			b.translateX(speed * d.x);
+			//bullets[i].translateY(speed * bullets[i].direction.y);
+			b.translateZ(speed * d.z);
+		}
+	}
+	
+	// Update AI.
+	for (var i = aiList2.length-1; i >= 0; i--) {
+		var a = aiList2[i];
+		if (a.health <= 0) {
+			aiList2.splice(i, 1);
+			scene.remove(a);
+			kills++;
+			$('#score').html(kills * 100);
+			//addAI();
+		}
+		// Move AI
+		var r = Math.random();
+		if (r > 0.995) {
+			a.lastRandomX = Math.random() * 2 - 1;
+			a.lastRandomZ = Math.random() * 2 - 1;
+		}
+		a.translateX(aispeed * a.lastRandomX);
+		a.translateZ(aispeed * a.lastRandomZ);
+		var c = getMapSector(a.position);
+		if (c.x < 0 || c.x >= mapW || c.y < 0 || c.y >= mapH || checkWallCollision(a.position)) {
+			a.translateX(-2 * aispeed * a.lastRandomX);
+			a.translateZ(-2 * aispeed * a.lastRandomZ);
+			a.lastRandomX = Math.random() * 2 - 1;
+			a.lastRandomZ = Math.random() * 2 - 1;
+		}
+		if (c.x < -1 || c.x > mapW || c.z < -1 || c.z > mapH) {
+			aiList2.splice(i, 1);
+			scene.remove(a);
+			
+			addAI2();
+			
+		}
+
+		
+		/*
+		var c = getMapSector(a.position);
+		if (a.pathPos == a.path.length-1) {
+			console.log('finding new path for '+c.x+','+c.z);
+			a.pathPos = 1;
+			a.path = getAIpath(a);
+		}
+		var dest = a.path[a.pathPos], proportion = (c.z-dest[1])/(c.x-dest[0]);
+		a.translateX(aispeed * proportion);
+		a.translateZ(aispeed * 1-proportion);
+		console.log(c.x, c.z, dest[0], dest[1]);
+		if (c.x == dest[0] && c.z == dest[1]) {
+			console.log(c.x+','+c.z+' reached destination');
+			a.PathPos++;
+		}
+		*/
+		var cc = getMapSector(cam.position);
+		if (Date.now() > a.lastShot + 750 && distance(c.x, c.z, cc.x, cc.z) < 2) {
+			createBullet(a);
+			a.lastShot = Date.now();
+		}
+
+		
+	// Update bullets. Walk backwards through the list so we can remove items.
+	for (var i = bullets.length-1; i >= 0; i--) {
+		var b = bullets[i], p = b.position, d = b.ray.direction;
+		if (checkWallCollision(p)) {
+			bullets.splice(i, 1);
+			scene.remove(b);
+			continue;
+		}
+		// Collide with AI
+		var hit = false;
+		for (var j = aiList2.length-1; j >= 0; j--) {
+			var aiListElement = aiList2[j];
+			//var vertices = aiListElement.geometry.vertices[0];
+			var c = aiListElement.position;
+			var x = Math.abs(vertices2.x), z = Math.abs(vertices2.z);
+			//console.log(Math.round(p.x), Math.round(p.z), c.x, c.z, x, z);
+			console.log(" if statement reached")
+			if (p.x < c.x + x && p.x > c.x - x &&
+					p.z < c.z + z && p.z > c.z - z &&
+					b.owner != aiListElement) {
+	
+				bullets.splice(i, 1);
+				scene.remove(b);
+				aiListElement.health -= PROJECTILEDAMAGE;
+				// var color = aiListElement.material.color, percent = aiListElement.health / 100;
+				// aiListElement.material.color.setRGB(
+				// 		percent * color.r,
+				// 		percent * color.g,
+				// 		percent * color.b
+				// );
+				hit = true;
+				console.log("hit")
+				break;
+			}
+		}
+		// Bullet hits player
+		if (distance(p.x, p.z, cam.position.x, cam.position.z) < 25 && b.owner != cam) {
+			$('#hurt').fadeIn(75);
+			health -= 10;
+			if (health < 0) health = 0;
+			val = health < 25 ? '<span style="color: darkRed">' + health + '</span>' : health;
+			$('#health').html(val);
+			bullets.splice(i, 1);
+			scene.remove(b);
+			$('#hurt').fadeOut(350);
+		}
+		if (!hit) {
+			b.translateX(speed * d.x);
+			//bullets[i].translateY(speed * bullets[i].direction.y);
+			b.translateZ(speed * d.z);
+		}
+	}
+	
 	
 	}
 
@@ -511,16 +703,80 @@ coin3 = new t.Mesh(
 }
 
 var aiList = [];
-//var vertices;
+
 var aiGeometry  = new t.CubeGeometry(40, 40, 40);
+
 function setupAI() {
 	for (var i = 0; i < NUMAI; i++) {
-		addAI();
+		//addAI();
+		
+	}
+
+}
+
+new t.ColladaLoader().load('models/spider.dae', function(collada) {
+	model = collada.scene;
+	skin = collada.skins[0];
+	model.scale.set(10, 10, 10);
+	//  model.rotation.x = 30;
+	 // model.rotation.z = 185;
+	model.position.set(2000, 55, 3000);
+
+
+});
+var aiList2=[];
+var vertices2;
+function setupAI2() {
+	for (var i = 0; i < NUMAI; i++) {
+		addAI2();
 	}
 
 }
 //Create a new BoxGeometry with dimensions 1 x 1 x 1
+function addAI2() {
+	var c = getMapSector(cam.position);
+	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
+	
+	var enemy = new t.Mesh(aiGeometry, aiMaterial);
+	
 
+
+
+	do {
+		var x = getRandBetween(0, mapW-1);
+		var z = getRandBetween(0, mapH-1);
+	} while (map[x][z] > 0 || (x == c.x && z == c.z));
+	x = Math.floor(x - mapW/2) * UNITSIZE;
+	z = Math.floor(z - mapW/2) * UNITSIZE;
+	
+	model.position.set(x, UNITSIZE * 0.15, z);
+	model.health = 100;
+	 // Higher-fidelity timers aren't a big deal here.
+	
+	model.pathPos = 1;
+	model.lastRandomX = Math.random();
+	model.lastRandomZ = Math.random();
+	model.lastShot = Date.now(); // Higher-fidelity timers aren't a big deal here.
+
+	// added by me
+
+	
+
+	// modelEnemy.position.set(200, UNITSIZE * 0.15, 200);
+	// modelEnemy.health = 100;
+	// modelEnemy.pathPos = 1;
+	// modelEnemy.lastRandomX = 300;
+	// modelEnemy.lastRandomZ = 300;
+	// modelEnemy.lastShot = Date.now();
+	vertices2 = enemy.geometry.vertices[0];
+
+	// console.log(modelEnemy.position)
+
+	aiList2.push(model);
+	
+	scene.add(model);
+
+}
 
 
 
@@ -529,6 +785,9 @@ function addAI() {
 	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
 	
 	var enemy = new t.Mesh(aiGeometry, aiMaterial);
+	
+	var modelEnemy = model;
+	//enemy = modelEnemy;
 
 
 
@@ -550,18 +809,17 @@ function addAI() {
 
 	// added by me
 
-	//var modelEnemy = model;
-	//enemy = modelEnemy;
+	
 
-	// modelEnemy.position.set(x, UNITSIZE * 0.15, z);
+	// modelEnemy.position.set(200, UNITSIZE * 0.15, 200);
 	// modelEnemy.health = 100;
 	// modelEnemy.pathPos = 1;
-	// modelEnemy.lastRandomX = Math.random();
-	// modelEnemy.lastRandomZ = Math.random();
+	// modelEnemy.lastRandomX = 300;
+	// modelEnemy.lastRandomZ = 300;
 	// modelEnemy.lastShot = Date.now();
-	//vertices = enemy.geometry.vertices[0];
+	// vertices = enemy.geometry.vertices[0];
 
-	//console.log(enemy.position)
+	// console.log(modelEnemy.position)
 
 	aiList.push(enemy);
 	scene.add(enemy);
@@ -668,7 +926,7 @@ function drawRadar() {
 }
 
 var bullets = [];
-var sphereMaterial = new t.MeshBasicMaterial({color: 0x333333});
+var sphereMaterial = new t.MeshBasicMaterial({color: 0x00FFFFFF});
 var sphereGeo = new t.SphereGeometry(2, 6, 6);
 function createBullet(obj) {
 	if (obj === undefined) {
