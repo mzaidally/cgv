@@ -7,13 +7,13 @@
 
 var map = [ // 1  2  3  4  5  6  7  8  9
 			
-           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
-		   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
+           [1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
+		   [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 2
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 3
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 4
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,],															 // 0
-           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
+           [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 1
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 2
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 1, 0, 1, 1, 1, 1, 1, 1,1,], // 3
            [1, 0, 0, 0, 0, 0, 0, 0, 0,  1, 0, 0, 0, 0, 0, 0, 0, 0,1,], // 4
@@ -33,12 +33,12 @@ var WIDTH = window.innerWidth,
 	MOVESPEED = 400,
 	LOOKSPEED = 0.5175,
 	BULLETMOVESPEED = MOVESPEED * 2,
-	NUMAI = 5,
+	NUMAI = 2,
 	PROJECTILEDAMAGE = 20;  // TODO
 // Global vars
 var t = THREE, scene, cam, renderer, controls, clock, projector, model, skin;
 var runAnim = true, mouse = { x: 0, y: 0 }, kills = 0, health = 100,coins=0;
-var healthCube,door,limit2, time_elapsed2,coin,coin1,coin2,coin3,speedBoost,speedPickup, lastHealthPickup,lastCoinPickup = 0;
+var healthCube,door,doorWall,limit2, time_elapsed2,coin,coin1,coin2,coin3,speedBoost,speedPickup, lastHealthPickup,lastCoinPickup = 0;
 /*
 var finder = new PF.AStarFinder({ // Defaults to Manhattan heuristic
 	allowDiagonal: true,
@@ -196,6 +196,7 @@ function render() {
 	healthcube.rotation.x += 0.004
 	healthcube.rotation.y += 0.008;
 	// Allow picking it up once per minute
+
 	
 	if (distance(cam.position.x, cam.position.z, speedBoost.position.x, speedBoost.position.z) < 15 ) {
 		
@@ -272,11 +273,11 @@ function render() {
 			scene.remove(coin3);
 		}
 		
-		if(coins>0&&distance(cam.position.x, cam.position.z, door.position.x, door.position.z) <15){
-			scene.remove(door);
-			
-		}
+		if(coins>0){
+			map[8][11]=0;
+			scene.remove(doorWall);
 
+		}
 		
 	
 
@@ -292,7 +293,7 @@ function render() {
 		var hit = false;
 		for (var j = aiList.length-1; j >= 0; j--) {
 			var aiListElement = aiList[j];
-			var vertices = aiListElement.geometry.vertices[0];
+			//var vertices = aiListElement.geometry.vertices[0];
 			var c = aiListElement.position;
 			var x = Math.abs(vertices.x), z = Math.abs(vertices.z);
 			//console.log(Math.round(p.x), Math.round(p.z), c.x, c.z, x, z);
@@ -358,7 +359,7 @@ function render() {
 		if (c.x < -1 || c.x > mapW || c.z < -1 || c.z > mapH) {
 			aiList.splice(i, 1);
 			scene.remove(a);
-			//addAI();
+			addAI();
 			
 			
 		}
@@ -397,7 +398,7 @@ function render() {
 		var hit = false;
 		for (var j = aiList.length-1; j >= 0; j--) {
 			var aiListElement = aiList[j];
-			var vertices = aiListElement.geometry.vertices[0];
+			//var vertices = aiListElement.geometry.vertices[0];
 			var c = aiListElement.position;
 			var x = Math.abs(vertices.x), z = Math.abs(vertices.z);
 			//console.log(Math.round(p.x), Math.round(p.z), c.x, c.z, x, z);
@@ -465,6 +466,7 @@ function render() {
 			scene.remove(a);
 			
 			addAI2();
+			
 			
 		}
 
@@ -592,6 +594,10 @@ function setupScene() {
 	scene.add(floor);
 	*/
 
+	// var img = new t.MeshLambertMaterial({
+		
+	// 	map:t.ImageUtils.loadTexture('images/floorstones.jpg')
+	// });
 	const texture = t.ImageUtils.loadTexture('images/floor.jpg');
 
 	texture.wrapS = THREE.RepeatWrapping;
@@ -600,14 +606,27 @@ function setupScene() {
 	texture.needsUpdate = true;
 
 	var floorTexture = new t.MeshLambertMaterial({map:texture});
-
-
 	// plane
 	var plane = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),floorTexture);
-
+	// var plane = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),img);
 	plane.scale.set(2,2,2);
 	plane.overdraw = true;
 	scene.add(plane);
+	
+	const textureRoof = t.ImageUtils.loadTexture('images/roof_backup.png');
+	textureRoof.wrapS = THREE.RepeatWrapping;
+	textureRoof.wrapT = THREE.RepeatWrapping;
+	textureRoof.repeat.set(100, 100,);
+	textureRoof.needsUpdate = true;
+	var roofTexture = new t.MeshLambertMaterial({map:textureRoof});
+	var roof = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),roofTexture);
+	// var roof = new t.Mesh(new t.CubeGeometry(units*UNITSIZE,10,units*UNITSIZE),img);
+	roof.scale.set(3,3,3);
+	roof.position.set(2500, 400, 4500)
+
+	roof.overdraw = true;
+	scene.add(roof);
+
 
 	// Geometry: walls
 	//var cube = new t.CubeGeometry(UNITSIZE, WALLHEIGHT, UNITSIZE);
@@ -617,35 +636,48 @@ function setupScene() {
 	                // new t.MeshLambertMaterial({color: 0xFBEBCD}),
 	                 
 
+					
+	var cube = new t.CubeGeometry(UNITSIZE, WALLHEIGHT, UNITSIZE);
 	for (var i = 0; i < mapW; i++) {
 		
 		for (var j = 0, m = map[i].length; j < m; j++) {
 			if (map[i][j]) {
 				//for (k=10;k>-1;k--){
 				
-				var cube = new t.CubeGeometry(UNITSIZE, WALLHEIGHT, UNITSIZE);
-								var materials;
-
+				
+				var materials;
 				if ( i < 8 && j > 9)
 					materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/scifi_walls.jpg')});
 
 				else
 					materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/floor.jpg')});
-
-	
 				
 				var wall = new t.Mesh(cube, materials);
 				
 				
 				wall.position.x = (i - units/2) * UNITSIZE;
-				wall.position.y = WALLHEIGHT/2;
+				wall.position.y = WALLHEIGHT;
 				wall.position.z = (j - units/2) * UNITSIZE;
-
+				wall.scale.set(1,2,1);
 				scene.add(wall);
 				//}
 			}
 		}
 	}
+
+
+	var materials = new t.MeshLambertMaterial({/*color: 0x660000,*/map: t.ImageUtils.loadTexture('images/scifi_walls.jpg')});
+
+	doorWall  = new t.Mesh(cube, materials);
+	
+	
+	doorWall.position.x = (8 - units/2) * UNITSIZE;
+	doorWall.position.y = WALLHEIGHT;
+	doorWall.position.z = (11 - units/2) * UNITSIZE;
+
+	scene.add(doorWall);
+
+	map[8][11] = 1;
 	
 	// Health cube
 	healthcube = new t.Mesh(
@@ -656,13 +688,6 @@ function setupScene() {
 	healthcube.scale.set(2,2,2);
 	scene.add(healthcube);
 
-	door = new t.Mesh(
-		new t.CubeGeometry(50, 55, 50),
-		new t.MeshBasicMaterial({map: t.ImageUtils.loadTexture('images/medieval_door.jpg')})
-	);
-	door.position.set(350, 145, 1750);
-	door.scale.set(0.5,5,15);
-	scene.add(door);
 		
 	speedBoost= new t.Mesh(
 		new t.SphereGeometry(10,10,10),
@@ -678,7 +703,7 @@ coin = new t.Mesh(
 		coin.position.set(650, 55, 1900);
 		coin.scale.set(2,2,2);
 		scene.add(coin);
-		
+
 coin1 = new t.Mesh(
 		new t.CubeGeometry(10, 10, 10),
 		new t.MeshNormalMaterial());
@@ -717,12 +742,12 @@ coin3 = new t.Mesh(
 }
 
 var aiList = [];
-
-var aiGeometry  = new t.CubeGeometry(40, 40, 40);
+var vertices;
+var aiGeometry  = new t.CubeGeometry(100, 100, 100);
 
 function setupAI() {
 	for (var i = 0; i < NUMAI; i++) {
-		//addAI();
+		addAI();
 		
 	}
 
@@ -731,18 +756,22 @@ function setupAI() {
 new t.ColladaLoader().load('models/spider.dae', function(collada) {
 	model = collada.scene;
 	skin = collada.skins[0];
-	model.scale.set(10, 10, 10);
-	//  model.rotation.x = 30;
-	 // model.rotation.z = 185;
-	model.position.set(2000, 55, 3000);
+	model.scale.set(20, 20, 20);
+
+	model.rotation.y = -0.5;
+	//  model.rotation.z = 185;
+	model.position.set(10, 5, 10);
 
 
 });
+
 var aiList2=[];
 var vertices2;
 function setupAI2() {
 	for (var i = 0; i < NUMAI; i++) {
+		
 		addAI2();
+	
 	}
 
 }
@@ -751,9 +780,8 @@ function addAI2() {
 	var c = getMapSector(cam.position);
 	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
 	
-	var enemy = new t.Mesh(aiGeometry, aiMaterial);
+	var enemy = new t.Mesh(aiGeometry,aiMaterial);
 	
-
 
 
 	do {
@@ -775,20 +803,15 @@ function addAI2() {
 	// added by me
 
 	
-
-	// modelEnemy.position.set(200, UNITSIZE * 0.15, 200);
-	// modelEnemy.health = 100;
-	// modelEnemy.pathPos = 1;
-	// modelEnemy.lastRandomX = 300;
-	// modelEnemy.lastRandomZ = 300;
-	// modelEnemy.lastShot = Date.now();
 	vertices2 = enemy.geometry.vertices[0];
 
 	// console.log(modelEnemy.position)
 
+
 	aiList2.push(model);
-	
+
 	scene.add(model);
+	
 
 }
 
@@ -796,12 +819,23 @@ function addAI2() {
 
 function addAI() {
 	var c = getMapSector(cam.position);
-	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
+
+	//var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/face.png')});
+	var eye = new t.TorusGeometry( 10,9, 16, 100 );
 	
-	var enemy = new t.Mesh(aiGeometry, aiMaterial);
+	var aiMaterial = new t.MeshBasicMaterial({/*color: 0xEE3333,*/map: t.ImageUtils.loadTexture('images/enemyBot.jpg')});
+
+	 var enemy = new t.Mesh(eye, aiMaterial);
+
+	enemy.scale.set(4,4,4);
+
+	var collCube = new t.CubeGeometry(20,20,20);
+	var collMesh = new t.Mesh(collCube,aiMaterial);
 	
-	var modelEnemy = model;
+
+
 	//enemy = modelEnemy;
+
 
 
 
@@ -812,7 +846,7 @@ function addAI() {
 	x = Math.floor(x - mapW/2) * UNITSIZE;
 	z = Math.floor(z - mapW/2) * UNITSIZE;
 	
-	enemy.position.set(x, UNITSIZE * 0.15, z);
+	enemy.position.set(x, UNITSIZE * 0.18, z);
 	enemy.health = 100;
 	 // Higher-fidelity timers aren't a big deal here.
 	
@@ -831,7 +865,8 @@ function addAI() {
 	// modelEnemy.lastRandomX = 300;
 	// modelEnemy.lastRandomZ = 300;
 	// modelEnemy.lastShot = Date.now();
-	// vertices = enemy.geometry.vertices[0];
+
+	vertices = collMesh.geometry.vertices[0];
 
 	// console.log(modelEnemy.position)
 
