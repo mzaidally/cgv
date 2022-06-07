@@ -1,0 +1,88 @@
+body {
+  background-color: rgb(42, 40, 40);
+  overflow: hidden;
+  font-family: "Montserrat", sans-serif;
+}
+
+#TOP {
+  position: relative;
+  margin: 0 auto;
+  clear: left;
+  height: auto;
+  z-index: 0;
+  text-align: center;
+  /* bottom: 50%; */
+  /* animation: slideUp .8s ease-in-out  forwards 1s; */
+}
+h1 {
+  color: rgb(0, 0, 0);
+  font-family: "Monoton", cursive;
+  font-size: 40px;
+  text-shadow: 0 0 5px #fff, 0 0 10px #780a0a, 0 0 35px #780a0a, 0 0 60px #780a0a, 0 0 70px #780a0a, 0 0 80px #780a0a, 0 0 100px #780a0a;
+  animation: slideUp 0.8s ease-in-out forwards 1s;
+}
+
+h2 {
+  color: rgb(0, 0, 0);
+  font-family: "Monoton", cursive;
+  font-size: 40px;
+  text-shadow: 0 0 5px #fff, 0 0 10px #780a0a, 0 0 35px #780a0a, 0 0 60px #780a0a, 0 0 70px #780a0a, 0 0 80px #780a0a, 0 0 100px #780a0a;
+  animation: slideUp 0.8s ease-in-out forwards 1s;
+}
+
+h3 {
+  color: rgb(0, 0, 0);
+  font-family: "Monospace", monospace;
+  font-size: 20px;
+  text-shadow: 0 0 5px #fff, 0 0 10px #780a0a, 0 0 35px #780a0a, 0 0 60px #780a0a, 0 0 70px #780a0a, 0 0 80px #780a0a, 0 0 100px #780a0a;
+  animation: slideUp 0.8s ease-in-out forwards 1s;
+}
+
+#Middle {
+  position: fixed;
+  top: 90%;
+  left: 80%;
+
+  transform: translate(-50%, -50%);
+  animation: slideUp 0.8s ease-in-out forwards 1s;
+}
+.buttons {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+  /* animation: slideUp .8s ease-in-out  forwards 1s; */
+}
+.canvas {
+  position: fixed;
+}
+button {
+  align-self: flex-end;
+  /* left: 75%; */
+  display: inline-block;
+  background-color: #780a0a;
+  border-radius: 10px;
+  border: 4px double #736e6e;
+  color: #000000;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  text-align: center;
+  font-family: "Monospace", monospace;
+  font-size: 28px;
+  padding: 20px;
+  width: 200px;
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 50px;
+}
+/* @keyframes slideUp {
+    0% {
+      transform: translateY(300px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  } */

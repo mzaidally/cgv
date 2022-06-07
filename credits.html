@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Credits</title>
+		<style>
+			body { margin: 0; }
+		</style>
+        <link rel="stylesheet" type="text/css" href="./css/Credits.css"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+       <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Righteous&display=swap" rel="stylesheet">
+        
+	</head>
+	<body>
+        <audio id="sound" autoplay loop >
+            <source src="./audio/background.mp3" type="audio/mp3"></sources>
+        </audio>
+
+        
+
+        <div id="TOP">
+            <h2>Credits</h2>
+            <h3>Brought to you by Ctrl-C Ctrl-V, our first-person shooter is inspired by many online games that have gained massive popularity over the years.<br>Our aim is to bring you endless fun and challenges.<br> Using trending modern techniques mixed up with retro audio, designs and game play,<br> you will definitely be hooked for hours!</h3>
+            <h3><br> Our creative team:<br>
+                Mohammed Zaid Ally - 1828282<br>
+                Mikhail Chirkoot - 2339279<br>
+                Fatima Essa - 2107007<br> 
+                Ibrahim Sudar - 2320387<br>
+                Yusuf Varachhia - 2322765<br>
+            </h3>
+            <br>
+            <h3>
+                The following resources have contributed to the creation of this game:<br>
+                youtube.com: various audio chosic.com <br>
+                Various sources from google images <br>
+                sound effects: mixkit.co<br>
+                Multiple techniques and implementations from threejs.org
+            </h3>
+        </div>
+        
+        <div id ="Middle" class = "Options">
+            <div id='Buttons' class='buttons'>
+                <!-- <button type ="button" id = 'buttons'>How to play</button><br><br> -->
+                <button type ="button" id = 'home'>Home</button><br><br>
+            </div>
+        
+         
+            
+        
+         </div>
+	</body>
+</html>
+
+
+
+<script>
+    var sound = document.getElementById("sound");
+    sound.volume = 0.4;  
+  
+    const home = document.getElementById('home');
+
+    home.onclick = function() {
+        window.location.href = "menu.html";
+    }
+
+    if (window.localStorage.getItem('mute') === "true") {
+		sound.muted = true;
+	} 
+</script>
